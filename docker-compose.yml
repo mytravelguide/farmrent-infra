@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    ports:
+      - "5100:9000"
+    command: -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/portainer-data:/data
+    restart: unless-stopped
+
+  jenkins:
+    build:
+      context: jenkins
+      dockerfile: Dockerfile
+    image: jenkins
+    privileged: true
+    user: root
+    container_name: jenkins
+    ports:
+      - "7602:8080"
+    volumes:
+      - /root/jenkins-data:/var/jenkins_home
+      - /root/jenkins-docker-certs:/certs/client:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.ssh:/root/.ssh
+    environment:
+      TZ: "Asia/Seoul"
+      JAVA_ARGS: "-Xmx4g"
+    restart: unless-stopped
+
+volumes:
+  portainer_data:
